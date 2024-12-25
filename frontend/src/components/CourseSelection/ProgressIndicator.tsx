@@ -11,9 +11,9 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ currentSte
     <div className="w-full max-w-3xl mx-auto mb-8">
       <div className="relative">
         {/* Progress Line */}
-        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 -translate-y-1/2" />
+        <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200" />
         <div 
-          className="absolute top-1/2 left-0 h-0.5 bg-blue-500 -translate-y-1/2 transition-all duration-300"
+          className="absolute top-5 left-0 h-0.5 bg-blue-500 transition-all duration-300"
           style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
         />
 
@@ -43,9 +43,6 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ currentSte
                     </span>
                   )}
                 </div>
-                <span className={`mt-2 text-sm ${isCurrent ? 'text-blue-500 font-medium' : 'text-gray-500'}`}>
-                  Step {stepNumber}
-                </span>
               </div>
             );
           })}

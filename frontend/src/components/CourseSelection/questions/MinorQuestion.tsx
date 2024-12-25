@@ -1,5 +1,6 @@
 import React from 'react';
 import { BookOpen } from 'lucide-react';
+import { MultiSelect } from '../../common/MultiSelect';
 
 const AVAILABLE_MINORS = [
   'Business',
@@ -27,17 +28,12 @@ export const MinorQuestion: React.FC<MinorQuestionProps> = ({ selected, onAnswer
         Select any minors you're pursuing. Leave empty if none.
       </p>
 
-      <select
-        multiple
-        value={selected}
-        onChange={(e) => onAnswer(Array.from(e.target.selectedOptions, option => option.value))}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        size={6}
-      >
-        {AVAILABLE_MINORS.map(minor => (
-          <option key={minor} value={minor}>{minor}</option>
-        ))}
-      </select>
+      <MultiSelect
+        options={AVAILABLE_MINORS}
+        selected={selected}
+        onChange={onAnswer}
+        label="Select Minors"
+      />
     </div>
   );
 };

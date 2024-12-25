@@ -1,5 +1,6 @@
 import React from 'react';
 import { Briefcase } from 'lucide-react';
+import { MultiSelect } from '../../common/MultiSelect';
 
 const CAREER_INTERESTS = [
   'Software Development',
@@ -29,17 +30,12 @@ export const CareerQuestion: React.FC<CareerQuestionProps> = ({ selected, onAnsw
         Select the career paths you're interested in pursuing.
       </p>
 
-      <select
-        multiple
-        value={selected}
-        onChange={(e) => onAnswer(Array.from(e.target.selectedOptions, option => option.value))}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        size={6}
-      >
-        {CAREER_INTERESTS.map(career => (
-          <option key={career} value={career}>{career}</option>
-        ))}
-      </select>
+      <MultiSelect
+        options={CAREER_INTERESTS}
+        selected={selected}
+        onChange={onAnswer}
+        label="Select Career Interests"
+      />
     </div>
   );
 };

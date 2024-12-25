@@ -1,6 +1,18 @@
 import React from 'react';
 import { Compass } from 'lucide-react';
+import { MultiSelect } from '../../common/MultiSelect';
 import type { CoreArea } from '../../../types';
+
+const CORE_AREAS = [
+  'Arts',
+  'Biological Sciences',
+  'Civilization Studies',
+  'Humanities',
+  'Language',
+  'Mathematical Sciences',
+  'Physical Sciences',
+  'Social Sciences',
+] as const;
 
 type CoreAreasQuestionProps = {
   selected: CoreArea[];
@@ -8,17 +20,6 @@ type CoreAreasQuestionProps = {
 };
 
 export const CoreAreasQuestion: React.FC<CoreAreasQuestionProps> = ({ selected, onAnswer }) => {
-  const coreAreas: CoreArea[] = [
-    'Arts',
-    'Biological Sciences',
-    'Civilization Studies',
-    'Humanities',
-    'Language',
-    'Mathematical Sciences',
-    'Physical Sciences',
-    'Social Sciences',
-  ];
-
   return (
     <div className="bg-white rounded-xl shadow-lg p-8">
       <div className="flex items-center mb-6">
@@ -30,17 +31,12 @@ export const CoreAreasQuestion: React.FC<CoreAreasQuestionProps> = ({ selected, 
         Select the core curriculum areas you're most interested in studying.
       </p>
 
-      <select
-        multiple
-        value={selected}
-        onChange={(e) => onAnswer(Array.from(e.target.selectedOptions, option => option.value) as CoreArea[])}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        size={6}
-      >
-        {coreAreas.map(area => (
-          <option key={area} value={area}>{area}</option>
-        ))}
-      </select>
+      <MultiSelect
+        options={CORE_AREAS}
+        selected={selected}
+        onChange={onAnswer as (selected: string[]) => void}
+        label="Select Core Areas"
+      />
       
       <p className="mt-2 text-sm text-gray-500">
         These preferences will help us recommend appropriate core curriculum courses.

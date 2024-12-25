@@ -30,7 +30,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ user, onNavigate, onSignOut 
         className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none"
       >
         <Home className="w-5 h-5" />
-        <span>{user.email}</span>
+        <span>{user.name || user.email}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 

@@ -1,5 +1,6 @@
 export type User = {
   email: string;
+  name?: string;
   majors: string[];
   minors: string[];
   careerInterests: string[];

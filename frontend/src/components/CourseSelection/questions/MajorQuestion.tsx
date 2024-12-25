@@ -1,5 +1,6 @@
 import React from 'react';
 import { BookOpen } from 'lucide-react';
+import { MultiSelect } from '../../common/MultiSelect';
 
 const AVAILABLE_MAJORS = [
   'Computer Science',
@@ -30,21 +31,12 @@ export const MajorQuestion: React.FC<MajorQuestionProps> = ({ selected, onAnswer
         Select your major(s) from the list below. You can choose multiple if you're pursuing a double major.
       </p>
 
-      <select
-        multiple
-        value={selected}
-        onChange={(e) => onAnswer(Array.from(e.target.selectedOptions, option => option.value))}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        size={6}
-      >
-        {AVAILABLE_MAJORS.map(major => (
-          <option key={major} value={major}>{major}</option>
-        ))}
-      </select>
-      
-      <p className="mt-2 text-sm text-gray-500">
-        Hold Ctrl/Cmd to select multiple majors
-      </p>
+      <MultiSelect
+        options={AVAILABLE_MAJORS}
+        selected={selected}
+        onChange={onAnswer}
+        label="Select Majors"
+      />
     </div>
   );
 };

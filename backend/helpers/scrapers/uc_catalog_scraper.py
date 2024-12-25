@@ -37,8 +37,9 @@ class UChicagoCatalogScraper:
         Returns:
             courses: a list of Course datatype
         """
-        
-        headings = [h3 for h3 in soup.find_all("h3") if f"{self.major} Courses" in h3.get_text(strip=True)]
+        major = self.major.capitalize()
+        print(major)
+        headings = [h3 for h3 in soup.find_all("h3") if f"{major} Courses" in h3.get_text(strip=True)]
         if not headings:
             raise Exception(f"error")
 

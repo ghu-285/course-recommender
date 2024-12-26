@@ -63,7 +63,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
+            {isLogin ? 'Welcome' : 'Create Account'}
           </h1>
           <p className="text-gray-600">
             {isLogin ? 'Sign in to continue' : 'Sign up to get started'}

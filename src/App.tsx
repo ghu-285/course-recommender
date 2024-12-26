@@ -4,12 +4,14 @@ import { QuestionFlow } from './components/CourseSelection/QuestionFlow';
 import { CourseSchedule } from './components/CourseSchedule';
 import { ProfilePage } from './components/ProfilePage';
 import { Header } from './components/Header/Header';
+import { LandingPage } from './components/LandingPage';
 import type { User, CoursePreference } from './types';
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
   const [preferences, setPreferences] = useState<CoursePreference[]>([]);
-  const [currentPage, setCurrentPage] = useState<'schedule' | 'profile' | 'course-selection' | 'help'>('schedule');
+  const [currentPage, setCurrentPage] = useState<'home' | 'schedule' | 'profile' | 'course-selection' | 'help'>('schedule');
 
   const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
 
@@ -44,12 +46,30 @@ export function App() {
   };
 
   const handleNavigate = (page: string) => {
-    setCurrentPage(page as 'schedule' | 'profile' | 'course-selection' | 'help');
+    switch (page) {
+      case 'home':
+        setUser(null);
+        setShowAuth(false);
+        setCurrentPage('schedule');
+        break;
+      case 'profile':
+        setCurrentPage('profile');
+        break;
+      case 'course selection':
+        setCurrentPage('course-selection');
+        break;
+      case 'help':
+        setCurrentPage('help');
+        break;
+      default:
+        setCurrentPage('schedule');
+    }
   };
 
   const handleSignOut = () => {
     setUser(null);
     setTranscriptFile(null); // Clear the transcript file on sign-out
+    setShowAuth(false);
     setCurrentPage('schedule');
   };
 
@@ -74,6 +94,10 @@ export function App() {
     setPreferences(preferences);
     setCurrentPage('schedule');
   };
+
+  if (!showAuth && !user) {
+    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+  }
 
   if (!user) {
     return <AuthForm onSubmit={handleAuth} />;

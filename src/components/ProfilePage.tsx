@@ -1,51 +1,49 @@
 import React, { useEffect, useState } from 'react';
-import { FileText, GraduationCap, BookOpen, Library } from 'lucide-react';
+import { FileText, Upload, AlertCircle } from 'lucide-react';
+import { parseTranscript } from '../services/transcriptParser';
 import type { User } from '../types';
 
 type ProfilePageProps = {
   user: User;
-  transcriptFile: File | null; // Include transcriptFile prop
+  transcriptFile: File | null;
+  onUpdate: (updatedUser: Partial<User>, transcriptFile: File | null) => void;
 };
 
-export const ProfilePage: React.FC<ProfilePageProps> = ({ user, transcriptFile }) => {
+export const ProfilePage: React.FC<ProfilePageProps> = ({ user, transcriptFile, onUpdate }) => {
   const [transcriptUrl, setTranscriptUrl] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'processing' | 'error'>('idle');
+  const [error, setError] = useState<string | null>(null);
 
-  // Generate Object URL for the uploaded transcript
   useEffect(() => {
     if (transcriptFile) {
       const url = URL.createObjectURL(transcriptFile);
       setTranscriptUrl(url);
-
-      // Cleanup URL when component unmounts or file changes
       return () => URL.revokeObjectURL(url);
     }
     setTranscriptUrl(null);
   }, [transcriptFile]);
 
-  const calculateGPA = (courses: User['courses']) => {
-    if (!courses || courses.length === 0) return 'N/A';
-    const totalCredits = courses.reduce((sum, course) => sum + course.credits, 0);
-    const totalGradePoints = courses.reduce((sum, course) => {
-      const gradePoints = gradeToPoints(course.grade);
-      return sum + gradePoints * course.credits;
-    }, 0);
-    return (totalGradePoints / totalCredits).toFixed(2);
-  };
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const gradeToPoints = (grade: string) => {
-    const gradeScale: { [key: string]: number } = {
-      A: 4.0,
-      'A-': 3.7,
-      B: 3.0,
-      'B+': 3.3,
-      'B-': 2.7,
-      C: 2.0,
-      'C+': 2.3,
-      'C-': 1.7,
-      D: 1.0,
-      F: 0.0,
-    };
-    return gradeScale[grade] || 0.0;
+    if (file.type !== 'application/pdf') {
+      setError('Please upload a valid PDF file');
+      return;
+    }
+
+    setError(null);
+    setUploadStatus('processing');
+
+    try {
+      const parsedData = await parseTranscript(file);
+      console.log('Parsed new transcript data:', parsedData);
+      onUpdate(parsedData, file);
+      setUploadStatus('idle');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to process transcript');
+      setUploadStatus('error');
+    }
   };
 
   return (
@@ -57,7 +55,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, transcriptFile }
             <h2 className="text-lg font-semibold text-gray-900 mb-2">General Information</h2>
             <p className="text-gray-600">{user.name || 'N/A'}</p>
             <p className="text-gray-600">Start Quarter: {user.startQuarter || 'N/A'}</p>
-            <p className="text-gray-600">Overall GPA: {user.gpa || calculateGPA(user.courses)}</p>
+            <p className="text-gray-600">Overall GPA: {user.gpa || 'N/A'}</p>
           </div>
 
           <div>
@@ -86,21 +84,42 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, transcriptFile }
             ) : (
               <p className="text-gray-600">No transcript uploaded</p>
             )}
+            <label
+              htmlFor="upload-new-transcript"
+              className="mt-4 inline-flex items-center text-blue-600 hover:text-blue-500 cursor-pointer"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Upload New Transcript
+            </label>
+            <input
+              id="upload-new-transcript"
+              type="file"
+              accept="application/pdf"
+              className="sr-only"
+              onChange={handleFileChange}
+            />
+            {uploadStatus === 'processing' && (
+              <p className="text-sm text-gray-500 mt-2">Processing...</p>
+            )}
+            {uploadStatus === 'error' && error && (
+              <div className="mt-2 p-3 rounded bg-red-50 text-red-600 text-sm flex items-center">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                {error}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Courses Section */}
       <div className="bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Courses</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Courses Taken</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {user.courses?.map((course, index) => (
-            <div key={index} className="border p-4 rounded-lg shadow-sm">
-              <h3 className="text-sm font-medium text-gray-800">{course.code}</h3>
-              <p className="text-sm text-gray-600">{course.name}</p>
-              <p className="text-sm text-gray-500">
-                {course.credits} credits • Grade: {course.grade} • {course.designation}
-              </p>
+            <div key={index} className="border p-3 rounded-lg shadow-sm">
+              <h4 className="text-base font-medium text-gray-800">{course.code}</h4>
+              <p className="text-base text-gray-600">{course.name}</p>
+              <p className="text-sm text-gray-500">Grade: {course.grade}</p>
             </div>
           ))}
         </div>

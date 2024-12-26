@@ -4,7 +4,7 @@ scraper = UChicagoCatalogScraper("economics")
 
 # Scrape courses
 courses = scraper.scrape()
-print(courses)
+print(courses[0])
 
 # import PyPDF2
 # from helpers.transcript_reader import TranscriptParser

@@ -70,7 +70,7 @@ class UChicagoCatalogScraper:
                 # extract extra details including profs and terms
                 detail_tag = sibling.find("p", class_="courseblockdetail")
                 details = detail_tag.get_text(strip=True) if detail_tag else ""
-                print(details)
+                # print(details)
 
                 # pattern recognition to get instructors
                 instructors = "N/A"

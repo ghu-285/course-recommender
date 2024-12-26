@@ -31,7 +31,7 @@ export function App() {
       majors: data.parsedData?.majors || [],
       minors: data.parsedData?.minors || [],
       careerInterests: data.parsedData?.careerInterests || [],
-      startQuarter: data.parsedData?.startQuarter || 'N/A', // Use startQuarter directly
+      startQuarter: data.parsedData?.startQuarter || 'N/A',
       gpa: data.parsedData?.gpa ?? 3.75,
       courses: data.parsedData?.courses ?? [],
     });
@@ -95,6 +95,17 @@ export function App() {
     setCurrentPage('schedule');
   };
 
+  const handleTranscriptUpdate = async (parsedData: Partial<User>, file: File | null) => {
+    console.log('Updating profile with new transcript data:', parsedData);
+
+    setUser((prevUser) => ({
+      ...prevUser,
+      ...parsedData,
+    }));
+
+    setTranscriptFile(file); // Update the transcript file reference
+  };
+
   if (!showAuth && !user) {
     return <LandingPage onGetStarted={() => setShowAuth(true)} />;
   }
@@ -120,7 +131,11 @@ export function App() {
         )}
 
         {currentPage === 'profile' && (
-          <ProfilePage user={user} transcriptFile={transcriptFile} />
+          <ProfilePage
+            user={user}
+            transcriptFile={transcriptFile}
+            onUpdate={handleTranscriptUpdate}
+          />
         )}
         
         {currentPage === 'help' && (

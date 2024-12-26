@@ -13,6 +13,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Course Recommender API!"}
+
 @app.post("/parse-transcript")
 async def parse_transcript(file: UploadFile = File(...)):
     if not file.filename.endswith('.pdf'):
@@ -20,12 +24,10 @@ async def parse_transcript(file: UploadFile = File(...)):
     
     try:
         content = await file.read()
-        #text = content.decode('utf-8')  # Assuming PDF is converted to text
-        
         parser = TranscriptParser(content)
         response = {
             "name": parser.get_name(),
-            "startQuarter": parser.get_start_quarter(),  
+            "startQuarter": parser.get_start_quarter(),
             "student_id": parser.get_student_id(),
             "gpa": parser.get_gpa(),
             "courses": parser.get_courses_descriptive(),

@@ -20,7 +20,7 @@ class UChicagoCatalogScraper:
         self.major = major.lower()
         self.url = f"{self.BASE_URL}{self.major}/#{self.major}courses"
 
-    def fetch_page(self):
+    def _fetch_page(self):
         response = requests.get(self.url)
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
@@ -28,7 +28,7 @@ class UChicagoCatalogScraper:
         else:
             raise Exception(f"Failed to fetch page. Status code: {response.status_code}")
 
-    def get_all_courses(self, soup: str):
+    def _get_all_courses(self, soup: str):
         """
         Gets all course and course details from a catalog page
 
@@ -46,11 +46,10 @@ class UChicagoCatalogScraper:
         last_heading = headings[-1]
 
         courses = []
+        # print(last_heading.find_next_siblings())
         for sibling in last_heading.find_next_siblings():
-            # print(sibling.name == "div")
-            # print(sibling.get("class", []))
-            # print("courseblock" in sibling.get("class", []))
-            if sibling.name == "div" and "courseblock" in sibling.get("class", []):
+            print(sibling.name,sibling.get("class", []))
+            if sibling.name == "div" and "courseblock" in sibling.get("class", [])[0]:
                 # main course details
                 title_tag = sibling.find("p", class_="courseblocktitle")
                 if title_tag:
@@ -98,11 +97,11 @@ class UChicagoCatalogScraper:
                 courses.append(Course(code,title,credits, description, instructors, prerequisites,terms, notes))
         return courses
 
-    def scrape(self):
+    def _scrape(self):
         """
         Fetch page and get all courses
         """
-        html = self.fetch_page()
-        course_divs = self.get_all_courses(html) 
+        html = self._fetch_page()
+        courses = self._get_all_courses(html) 
 
-        return course_divs
+        return courses

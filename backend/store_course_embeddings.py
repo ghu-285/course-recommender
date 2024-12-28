@@ -2,7 +2,8 @@ from helpers.database.mongo import (
     get_mongo_client,
     initialize_mongo_database,
     insert_course,
-    fetch_all_courses
+    fetch_all_courses,
+    fetch_courses_by_major
 )
 from helpers.scrapers.uc_catalog_scraper import UChicagoCatalogScraper
 from helpers.RAG import RAG
@@ -18,13 +19,14 @@ client = get_mongo_client()
 collection = initialize_mongo_database(client)
 
 # Initialize scraper and RAG
-scraper = UChicagoCatalogScraper("economics")
+major = "economics"
+scraper = UChicagoCatalogScraper(major)
 rag = RAG()
 
 # Scrape courses
-courses = scraper.scrape()
+courses = scraper._scrape()
 
 # Store courses in MongoDB
 for course in courses:
     embedding = rag._embed_description(course.description)
-    insert_course(collection, course.code, course.title, course.description, embedding)
+    insert_course(collection, major, course.code, course.title, course.description, embedding)

@@ -2,7 +2,8 @@ from helpers.database.mongo import (
     get_mongo_client,
     initialize_mongo_database,
     insert_course,
-    fetch_all_courses
+    fetch_all_courses,
+    fetch_courses_by_major
 )
 from helpers.scrapers.uc_catalog_scraper import UChicagoCatalogScraper
 from helpers.RAG import RAG
@@ -16,7 +17,7 @@ client = get_mongo_client()
 collection = initialize_mongo_database(client)
 
 # Fetch and print all courses
-all_courses = fetch_all_courses(collection)
+all_courses = fetch_courses_by_major(collection, "mathematics")
 
 course_list = [course["code"] for course in all_courses]
 embedding_list = [course["embedding"] for course in all_courses]

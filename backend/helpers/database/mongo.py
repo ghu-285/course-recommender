@@ -17,11 +17,12 @@ def initialize_mongo_database(client, db_name="course_catalog", collection_name=
     db = client[db_name]
     return db[collection_name]
 
-def insert_course(collection, code, title, description, embedding):
+def insert_course(collection, major, code, title, description, embedding):
     """
     Insert a course into the MongoDB collection.
     """
     course_data = {
+        "major": major,
         "code": code,
         "title": title,
         "description": description,
@@ -40,3 +41,10 @@ def fetch_course_by_code(collection, code):
     Fetch a single course by its code.
     """
     return collection.find_one({"code": code}, {"_id": 0})
+
+def fetch_courses_by_major(collection, major):
+    """
+    Fetch all courses for a specific major.
+    """
+    return list(collection.find({"major": major}, {"_id": 0}))
+

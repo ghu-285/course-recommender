@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, errors
 import os
 
 def get_mongo_client():
@@ -13,22 +13,35 @@ def get_mongo_client():
 def initialize_mongo_database(client, db_name="course_catalog", collection_name="courses"):
     """
     Initialize MongoDB and return a collection.
+    Ensures a unique index on the 'code' field to prevent duplicates.
     """
     db = client[db_name]
-    return db[collection_name]
+    collection = db[collection_name]
+    
+    # duplicate prevention
+    collection.create_index([("major", 1), ("code", 1)], unique=True)
+    return collection
 
 def insert_course(collection, major, code, title, description, embedding):
     """
-    Insert a course into the MongoDB collection.
+    Insert or update a course in the MongoDB collection.
+    Prevents duplicates by using upsert.
     """
     course_data = {
         "major": major,
-        "code": code,
         "title": title,
         "description": description,
         "embedding": embedding
     }
-    collection.insert_one(course_data)
+    try:
+        collection.update_one(
+            {"major": major, "code": code},  
+            {"$set": course_data},     
+            upsert=True                
+        )
+        print(f"Successfully added/updated course: {code}")
+    except errors.DuplicateKeyError:
+        print(f"skipped: {code}")
 
 def fetch_all_courses(collection):
     """
@@ -47,4 +60,3 @@ def fetch_courses_by_major(collection, major):
     Fetch all courses for a specific major.
     """
     return list(collection.find({"major": major}, {"_id": 0}))
-

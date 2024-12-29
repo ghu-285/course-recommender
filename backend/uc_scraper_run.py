@@ -4,7 +4,7 @@ from helpers.RAG import RAG
 
 
 # Initialize scraper and RAG
-major = "computerscience"
+major = "Mathematics"
 scraper = UChicagoCatalogScraper(major)
 
 # Scrape courses

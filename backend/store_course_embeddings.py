@@ -19,7 +19,7 @@ client = get_mongo_client()
 collection = initialize_mongo_database(client)
 
 # Initialize scraper and RAG
-major = "economics"
+major = "Computer Science"
 scraper = UChicagoCatalogScraper(major)
 rag = RAG()
 

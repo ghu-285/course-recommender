@@ -52,20 +52,22 @@ async def login(data: dict):
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password are required")
 
-    try:
-        user = find_user_by_email(email)
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid email or password")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    # Find the user in MongoDB
+    user = find_user_by_email(email)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    try:
-        if not pwd_context.verify(password, user.get("password")):
-            raise HTTPException(status_code=401, detail="Invalid email or password")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Password verification failed: {str(e)}")
+    # Verify password
+    if not pwd_context.verify(password, user.get("password")):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    return {"message": "Login successful"}
+    # Convert MongoDB ObjectId to string for JSON serialization
+    user["_id"] = str(user["_id"])
+
+    # Remove sensitive information
+    user.pop("password", None)
+
+    return {"message": "Login successful", "user": user}
 
 
 @app.post("/signup")
@@ -104,11 +106,11 @@ async def update_user_endpoint(user_data: dict):
         if not email:
             raise HTTPException(status_code=400, detail="Email is required")
 
-        updated_user = update_user(email, user_data)
+        updated_user = update_user(email, user_data)  # Use your existing `update_user` function
         if not updated_user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        # Convert ObjectId to string
+        # Convert ObjectId to string if needed
         if "_id" in updated_user:
             updated_user["_id"] = str(updated_user["_id"])
 

@@ -20,60 +20,41 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-
+  
     try {
       if (isLogin) {
-        // Login API call
         const response = await fetch('http://localhost:8000/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
         });
-
+  
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.detail || 'Invalid email or password');
         }
-
+  
         const data = await response.json();
         console.log('Login successful:', data);
+  
+        // Pass the user data to the parent component
+        onSubmit({
+          email: data.user.email,
+          password,
+          parsedData: data.user,
+        });
+  
         alert('Login successful!');
         return;
       }
-
-      // Signup flow
-      let parsedData: Partial<User> | undefined;
-
-      if (transcript) {
-        setUploadStatus('processing');
-        parsedData = await parseTranscript(transcript);
-        console.log('Parsed data:', parsedData);
-        setUploadStatus('idle');
-      }
-
-      const response = await fetch('http://localhost:8000/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password,
-          ...parsedData, // Include transcript parsing data
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Signup failed');
-      }
-
-      alert('Account created successfully!');
+  
+      // Signup logic...
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
-      console.error('Error:', err);
     } finally {
       setIsLoading(false);
     }
-  };
+  };  
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

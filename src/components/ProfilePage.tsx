@@ -23,6 +23,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, transcriptFile, 
     setTranscriptUrl(null);
   }, [transcriptFile]);
 
+  const saveUserToMongo = async (updatedUser: Partial<User>) => {
+    try {
+      const response = await fetch('/api/updateUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedUser),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user in the database.');
+      }
+
+      console.log('User updated successfully:', await response.json());
+    } catch (err) {
+      console.error('Error updating user in MongoDB:', err);
+    }
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -38,7 +56,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, transcriptFile, 
     try {
       const parsedData = await parseTranscript(file);
       console.log('Parsed new transcript data:', parsedData);
+
       onUpdate(parsedData, file);
+
+      // Save updated profile to MongoDB
+      await saveUserToMongo({ ...user, ...parsedData });
+
       setUploadStatus('idle');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process transcript');

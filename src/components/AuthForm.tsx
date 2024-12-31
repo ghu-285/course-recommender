@@ -22,6 +22,26 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
     setIsLoading(true);
 
     try {
+      if (isLogin) {
+        // Call the login API endpoint
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Invalid email or password');
+        }
+
+        const data = await response.json();
+        console.log('Login successful:', data);
+        alert('Login successful!');
+        // Proceed to redirect or save user data as needed
+        return;
+      }
+
+      // Sign-up flow (parsing transcript)
       let parsedData: Partial<User> | undefined;
 
       if (transcript) {
@@ -31,15 +51,16 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
         setUploadStatus('idle');
       }
 
-      onSubmit({ 
-        email, 
-        password, 
+      onSubmit({
+        email,
+        password,
         parsedData, // Pass parsedData with startQuarter
         transcriptFile: transcript || undefined, // Pass the uploaded transcript file
       });
+
+      alert('Account created successfully!');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process transcript');
-      setUploadStatus('idle');
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setIsLoading(false);
     }
@@ -79,9 +100,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
               required
@@ -93,9 +112,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <input
               type="password"
               required

@@ -23,44 +23,53 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
 
     try {
       if (isLogin) {
-        // Call the login API endpoint
-        const response = await fetch('/api/login', {
+        // Login API call
+        const response = await fetch('http://localhost:8000/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
         });
 
         if (!response.ok) {
-          throw new Error('Invalid email or password');
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Invalid email or password');
         }
 
         const data = await response.json();
         console.log('Login successful:', data);
         alert('Login successful!');
-        // Proceed to redirect or save user data as needed
         return;
       }
 
-      // Sign-up flow (parsing transcript)
+      // Signup flow
       let parsedData: Partial<User> | undefined;
 
       if (transcript) {
         setUploadStatus('processing');
         parsedData = await parseTranscript(transcript);
-        console.log('Parsed data from API in handleSubmit:', parsedData); // Debug log
+        console.log('Parsed data:', parsedData);
         setUploadStatus('idle');
       }
 
-      onSubmit({
-        email,
-        password,
-        parsedData, // Pass parsedData with startQuarter
-        transcriptFile: transcript || undefined, // Pass the uploaded transcript file
+      const response = await fetch('http://localhost:8000/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          ...parsedData, // Include transcript parsing data
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Signup failed');
+      }
 
       alert('Account created successfully!');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
+      console.error('Error:', err);
     } finally {
       setIsLoading(false);
     }

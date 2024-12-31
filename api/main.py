@@ -12,7 +12,7 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update this with your frontend URL in production
+    allow_origins=["http://localhost:5173"],  # Update this with your frontend URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,16 +52,21 @@ async def login(data: dict):
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password are required")
 
-    # Find the user in MongoDB
-    user = find_user_by_email(email)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+    try:
+        user = find_user_by_email(email)
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-    # Verify password
-    if not pwd_context.verify(password, user.get("password")):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+    try:
+        if not pwd_context.verify(password, user.get("password")):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Password verification failed: {str(e)}")
 
     return {"message": "Login successful"}
+
 
 @app.post("/signup")
 async def signup(user_data: dict):
@@ -71,11 +76,14 @@ async def signup(user_data: dict):
     if not email or not plain_password:
         raise HTTPException(status_code=400, detail="Email and password are required")
 
-    existing_user = find_user_by_email(email)
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email is already registered")
+    try:
+        existing_user = find_user_by_email(email)
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email is already registered")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-    # Hash the password before storing
+    # Hash the password
     hashed_password = pwd_context.hash(plain_password)
     user_data["password"] = hashed_password
 
@@ -83,8 +91,9 @@ async def signup(user_data: dict):
         user_id = insert_user(user_data)
         return {"message": "Account created successfully", "user_id": str(user_id)}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to create user: {str(e)}")
 
+    
 @app.post("/api/updateUser")
 async def update_user_endpoint(user_data: dict):
     """

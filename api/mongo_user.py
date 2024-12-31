@@ -15,27 +15,18 @@ DB_NAME = os.getenv("DB_NAME", "course_recommender")
 client = MongoClient(MONGO_URI)
 db = client[DB_NAME]
 
-def insert_user(user_data: dict):
-    """
-    Inserts a new user into the database.
+def find_user_by_email(email: str):
+    try:
+        return db.users.find_one({"email": email})
+    except Exception as e:
+        raise Exception(f"Error finding user by email: {e}")
 
-    :param user_data: Dictionary containing user data
-    :return: The ID of the inserted user
-    """
+def insert_user(user_data: dict):
     try:
         result = db.users.insert_one(user_data)
         return result.inserted_id
     except Exception as e:
         raise Exception(f"Error inserting user: {e}")
-
-def find_user_by_email(email: str):
-    """
-    Finds a user by email.
-
-    :param email: User's email address
-    :return: User document or None
-    """
-    return db.users.find_one({"email": email})
 
 def update_user(email: str, updated_data: dict):
     """

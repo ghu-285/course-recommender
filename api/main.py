@@ -71,29 +71,36 @@ async def login(data: dict):
 
 
 @app.post("/signup")
-async def signup(user_data: dict):
+async def signup(user_data: dict, transcript: UploadFile = None):
     email = user_data.get("email")
     plain_password = user_data.get("password")
 
     if not email or not plain_password:
         raise HTTPException(status_code=400, detail="Email and password are required")
 
-    try:
-        existing_user = find_user_by_email(email)
-        if existing_user:
-            raise HTTPException(status_code=400, detail="Email is already registered")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    existing_user = find_user_by_email(email)
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email is already registered")
 
-    # Hash the password
+    # Hash the password before storing
     hashed_password = pwd_context.hash(plain_password)
     user_data["password"] = hashed_password
+
+    # Handle transcript
+    if transcript:
+        if not transcript.filename.endswith('.pdf'):
+            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+        try:
+            content = await transcript.read()
+            user_data["transcript"] = content  # Save transcript content in the database
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error saving transcript: {str(e)}")
 
     try:
         user_id = insert_user(user_data)
         return {"message": "Account created successfully", "user_id": str(user_id)}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create user: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
     
 @app.post("/api/updateUser")

@@ -14,23 +14,34 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, transcriptFile, 
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'processing' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
 
-  // Handle transcript file URL for preview
+  // Generate transcript URL for preview
   useEffect(() => {
     if (transcriptFile) {
       const url = URL.createObjectURL(transcriptFile);
       setTranscriptUrl(url);
       return () => URL.revokeObjectURL(url);
+    } else if (user.transcript) {
+      // If transcript exists in MongoDB, create a Blob URL
+      const transcriptBlob = new Blob([user.transcript], { type: 'application/pdf' });
+      const url = URL.createObjectURL(transcriptBlob);
+      setTranscriptUrl(url);
+      return () => URL.revokeObjectURL(url);
     }
     setTranscriptUrl(null);
-  }, [transcriptFile]);
+  }, [transcriptFile, user.transcript]);
 
   // Save the updated user profile to MongoDB
-  const saveUserToMongo = async (updatedUser: Partial<User>) => {
+  const saveUserToMongo = async (updatedUser: Partial<User>, file?: File) => {
+    const formData = new FormData();
+    formData.append('user', JSON.stringify(updatedUser));
+    if (file) {
+      formData.append('transcript', file);
+    }
+
     try {
       const response = await fetch('http://localhost:8000/api/updateUser', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedUser),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -65,8 +76,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, transcriptFile, 
       // Update frontend state
       onUpdate(parsedData, file);
 
-      // Save updated profile to MongoDB
-      await saveUserToMongo({ ...user, ...parsedData });
+      // Save updated profile to MongoDB, including the transcript file
+      await saveUserToMongo({ ...user, ...parsedData }, file);
 
       setUploadStatus('idle');
     } catch (err) {

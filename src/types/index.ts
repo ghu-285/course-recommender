@@ -15,6 +15,11 @@ export type User = {
     designation: 'Core' | 'Major' | 'Minor';
     area?: string;
   }[];
+  timePreferences?: {
+    timeSlotRanking: string[];
+    dayRanking: string[];
+    spacing: string;
+  };
 };
 
 export type CourseDesignation = 'Core Curriculum' | 'Major' | 'Minor';

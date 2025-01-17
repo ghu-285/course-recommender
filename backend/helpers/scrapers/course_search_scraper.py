@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-def scrape_course_search(term_value, search_text):
+def scrape_course_search(search_text, term_value="2252"):
     driver = webdriver.Chrome()
     url = "https://coursesearch92.ais.uchicago.edu/psc/prd92guest/EMPLOYEE/HRMS/c/UC_STUDENT_RECORDS_FL.UC_CLASS_SEARCH_FL.GBL"
     driver.get(url)
@@ -35,45 +35,57 @@ def scrape_course_search(term_value, search_text):
     )
     print("Results loaded.")
 
+    #add sleep to let the page load
+    time.sleep(2) 
+
     # -- Extract Results --
     results = []
 
-    # Get all course titles
+    # get all elements associated to the sections we need
     titles = driver.find_elements(By.CSS_SELECTOR, "span[id^='UC_CLSRCH_WRK_UC_CLASS_TITLE']")
     sections = driver.find_elements(By.CSS_SELECTOR, "span[id^='UC_CLSRCH_WRK_DESCR1']")
     instructors = driver.find_elements(By.CSS_SELECTOR, "span[id^='UC_CLSRCH_WRK_SSR_INSTR_LONG']")
     meeting_times = driver.find_elements(By.CSS_SELECTOR, "span[id^='UC_PREREG_WRK_DESCRLONG']")
 
-    print(f"Found {len(titles)} titles, {len(sections)} sections, {len(instructors)} instructors, {len(meeting_times)} meeting times.")
+    # 2) Find the divs that contain the raw text like "BUSN 20400/1 [22278] - LEC"
+    #    Adjust this selector if needed to match your actual HTML structure.
+    raw_course_info = driver.find_elements(By.CSS_SELECTOR, "div[id^='win0divUC_RSLT_NAV_WRK_HTMLAREA'] div.ps-htmlarea")
 
-    # Debug: Print raw data
-    for i, title in enumerate(titles):
-        print(f"Title {i}: {title.text.strip()}")
+    print(f"Found {len(titles)} titles, {len(sections)} sections, {len(instructors)} instructors, {len(meeting_times)} meeting times, {len(raw_course_info)} raw course-info divs.")
 
-    for i, section in enumerate(sections):
-        print(f"Section {i}: {section.text.strip()}")
-
-    for i, instructor in enumerate(instructors):
-        print(f"Instructor {i}: {instructor.text.strip()}")
-
-    for i, meeting_time in enumerate(meeting_times):
-        print(f"Meeting Time {i}: {meeting_time.text.strip()}")
+    # -- Debug prints --
+    for i, info in enumerate(raw_course_info):
+        print(f"Raw course info {i}: {info.text.strip()}")
 
     # -- Match Data and Collect Results --
-    num_results = max(len(titles), len(sections), len(instructors), len(meeting_times))
+    num_results = max(
+        len(titles),
+        len(sections),
+        len(instructors),
+        len(meeting_times),
+        len(raw_course_info)
+    )
 
     for i in range(num_results):
         try:
-            title = titles[i].text.strip() if i < len(titles) else "N/A"
-            section = sections[i].text.strip() if i < len(sections) else "N/A"
-            instructor = instructors[i].text.strip() if i < len(instructors) else "N/A"
-            meeting_time = meeting_times[i].text.strip() if i < len(meeting_times) else "N/A"
+            title       = titles[i].text.strip()       if i < len(titles)       else "N/A"
+            section     = sections[i].text.strip()     if i < len(sections)     else "N/A"
+            instructor  = instructors[i].text.strip()  if i < len(instructors)  else "N/A"
+            meeting_time= meeting_times[i].text.strip()if i < len(meeting_times)else "N/A"
+
+            # extract the course code line
+            raw_info = raw_course_info[i].text.strip() if i < len(raw_course_info) else ""
+            first_line = raw_info.split("\n")[0] if raw_info else ""
+            # parse the line
+            course_code = first_line.split("/")[0].replace(" ", "")
 
             # Check if search text matches the section or title
-            if search_text.lower() in section.lower() or search_text.lower() in title.lower():
+            if (search_text.lower() in section.lower() or
+                search_text.lower() in title.lower()):
                 result_dict = {
+                    "course_code": course_code,
                     "title": title,
-                    "section": section,
+                    "enrollment": section,
                     "instructor": instructor,
                     "meeting_time": meeting_time
                 }
@@ -83,19 +95,9 @@ def scrape_course_search(term_value, search_text):
             print(f"Error parsing result {i}: {e}")
             continue
 
-    # -- Display Results --
-    if results:
-        for i, course in enumerate(results, 1):
-            print(f"{i}. TITLE        = {course['title']}")
-            print(f"   SECTION     = {course['section']}")
-            print(f"   INSTRUCTOR  = {course['instructor']}")
-            print(f"   MEETING TIME= {course['meeting_time']}\n")
-    else:
-        print("No matching results found.")
-
     driver.quit()
+    print(results)
     return results
 
-
 if __name__ == "__main__":
-    scrape_course_search(term_value="2252", search_text="Investments")
+    scrape_course_search(search_text="Investments", term_value="2252")

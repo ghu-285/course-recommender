@@ -1,0 +1,34 @@
+{
+    "degree": "BA in Economics",
+    "track": "Standard Track",
+    "requirements": {
+      "required": [
+        ["MATH 13300", "MATH 15300", "MATH 16300", "MATH 16310"],
+        ["ECON 20000-20100-20200", "ECON 20010-20110-20210"],
+        ["MATH 15250", "MATH 20400", "MATH 20410", "MATH 20800"],
+        ["MATH 19620", "MATH 20250", "STAT 24300", "MATH 20700"],
+        ["STAT 23400", "STAT 24400", "STAT 24410"],
+        ["ECON 21020", "ECON 21030"],
+        ["ECON 23950", "ECON 23200", "ECMA 33220", "ECMA 33330"]
+      ],
+
+      "electives": [
+        ["CMSC 14100", "BUSN 20550"],
+        ["STAT 24500", "STAT 24510"],
+        ["STAT 25100", "STAT 25150"],
+        ["STAT 25300"],
+        ["STAT 26100"],
+        ["MATH 20500", "MATH 20510", "MATH 20520", "MATH 20900"],
+        ["MATH 27300"],
+        ["BUSN 20410", "BUSN 35200"],
+        ["BUSN 20620", "BUSN 37105"],
+        ["BUSN 20710", "BUSN 38120"],
+        ["BUSN 20800", "BUSN 41201"],
+        ["BUSN 20820", "BUSN 41203"],
+        ["BUSN 20810", "BUSN 41204"],
+        ["BUSN 20900", "BUSN 42001"]
+      ],
+      "elective_count": 4
+    }
+  }
+  

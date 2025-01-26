@@ -10,16 +10,13 @@ def get_mongo_client():
         raise ValueError("MONGO_URI is not set in the environment variables.")
     return MongoClient(uri)
 
-def initialize_mongo_database(client, db_name="course_catalog", collection_name="courses"):
+def initialize_mongo_database(client, db_name, collection_name):
     """
     Initialize MongoDB and return a collection.
-    Ensures a unique index on the 'code' field to prevent duplicates.
+    Ensures a unique index if necessary.
     """
     db = client[db_name]
     collection = db[collection_name]
-    
-    # duplicate prevention
-    collection.create_index([("major", 1), ("code", 1)], unique=True)
     return collection
 
 def insert_course(collection, major, code, title, description, embedding):
@@ -41,7 +38,7 @@ def insert_course(collection, major, code, title, description, embedding):
         )
         print(f"Successfully added/updated course: {code}")
     except errors.DuplicateKeyError:
-        print(f"skipped: {code}")
+        print(f"Skipped duplicate course: {code}")
 
 def fetch_all_courses(collection):
     """
@@ -60,3 +57,24 @@ def fetch_courses_by_major(collection, major):
     Fetch all courses for a specific major.
     """
     return list(collection.find({"major": major}, {"_id": 0}))
+
+def fetch_users_by_email(collection, email):
+    """
+    Fetch user data for a specific email.
+    """
+    return collection.find_one({"email": email}, {"_id": 0})
+
+def fetch_user_data(client, email, users_collection_name="users"):
+    """
+    Fetch all user data for a specific email from the 'users' collection.
+    """
+    # Access the 'users' collection
+    users_collection = initialize_mongo_database(client, "course_recommender", users_collection_name)
+    
+    # Fetch user data by email
+    user = fetch_users_by_email(users_collection, email)
+    if not user:
+        print(f"No user found with email: {email}")
+        return None
+
+    return user

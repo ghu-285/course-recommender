@@ -12,6 +12,7 @@ class Student:
         Initialize the User class with the given email.
         """
         self.email = email
+        self.major = None
         self.client = None
         self.user_data = None
 

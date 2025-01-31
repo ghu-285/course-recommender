@@ -29,7 +29,7 @@ class UChicagoCatalogScraper:
         else:
             raise Exception(f"Failed to fetch page. Status code: {response.status_code}")
 
-    def _get_all_courses(self, soup: str):
+    def _get_all_courses(self, section, soup: str):
         """
         Gets all course and course details from a catalog page
 
@@ -40,7 +40,7 @@ class UChicagoCatalogScraper:
         """
         major = self.major
         print(major)
-        headings = [h3 for h3 in soup.find_all("h3") if f"{major} Courses" in h3.get_text(strip=True)]
+        headings = [h3 for h3 in soup.find_all("h3") if f"{section} Courses" in h3.get_text(strip=True)]
         if not headings:
             raise Exception(f"error")
 
@@ -115,11 +115,11 @@ class UChicagoCatalogScraper:
         courses.append(Course(code, title, credits, description, instructors, prerequisites, terms, notes))
 
 
-    def _scrape(self):
+    def _scrape(self, section):
         """
         Fetch page and get all courses
         """
         html = self._fetch_page()
-        courses = self._get_all_courses(html) 
+        courses = self._get_all_courses(section, html) 
 
         return courses

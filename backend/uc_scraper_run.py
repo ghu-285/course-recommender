@@ -4,10 +4,10 @@ from helpers.RAG import RAG
 
 
 # Initialize scraper and RAG
-major = "Mathematics"
+major = "Economics"
 scraper = UChicagoCatalogScraper(major)
 
 # Scrape courses
-courses = scraper._scrape()
+courses = scraper._scrape("Business Economics")
 
 print(courses)

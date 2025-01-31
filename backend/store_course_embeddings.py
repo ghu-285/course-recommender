@@ -16,10 +16,12 @@ load_dotenv()
 
 # Initialize MongoDB
 client = get_mongo_client()
-collection = initialize_mongo_database(client)
+db_name = "course_catalog"
+collection_name = "courses" 
+collection = initialize_mongo_database(client, db_name, collection_name)
 
 # Initialize scraper and RAG
-major = "Computer Science"
+major = "Mathematics"
 scraper = UChicagoCatalogScraper(major)
 rag = RAG()
 

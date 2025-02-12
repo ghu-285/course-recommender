@@ -20,13 +20,22 @@ db_name = "course_catalog"
 collection_name = "courses" 
 collection = initialize_mongo_database(client, db_name, collection_name)
 
-# Initialize scraper and RAG
-major = "Mathematics"
+# added majors #
+#Economics
+#Business Economics
+#Mathematics
+#Computer Science
+#Statistics
+#Data Science
+#Physics
+#Chemistry
+
+major = "Chemistry"
 scraper = UChicagoCatalogScraper(major)
 rag = RAG()
 
 # Scrape courses
-courses = scraper._scrape()
+courses = scraper._scrape("Chemistry")
 
 # Store courses in MongoDB
 for course in courses:

@@ -26,24 +26,25 @@ collection_name = "courses"
 collection = initialize_mongo_database(client, db_name, collection_name)
 
 # Fetch and print all courses
-econ_courses = fetch_courses_by_major(collection, "economics")
-math_courses = fetch_courses_by_major(collection, "Computer Science")
-
-
-course_list = [course["code"] for course in econ_courses] + [course["code"] for course in math_courses]
-embedding_list = [course["embedding"] for course in econ_courses] + [course["embedding"] for course in math_courses]
+courses_to_check = ["Economics","Computer Science", "Mathematics"]
+course_list = []
+embedding_list = []
+for major in courses_to_check:
+    courses = fetch_courses_by_major(collection, major)
+    course_list += [course["code"] for course in courses]
+    embedding_list += [course["embedding"] for course in courses]
 
 #user profile part
-import json
-json_file_path = "helpers/database/major_requirements.json"
-with open(json_file_path, "r") as file:
-    major_requirements = json.load(file)
-requirements = major_requirements["requirements"]["required"]
-electives = major_requirements["requirements"]["electives"]
+# import json
+# json_file_path = "helpers/database/major_requirements.json"
+# with open(json_file_path, "r") as file:
+#     major_requirements = json.load(file)
+# requirements = major_requirements["requirements"]["required"]
+# electives = major_requirements["requirements"]["electives"]
 
 
 rag = RAG()
-query = "i am a student interested in financial markets and machine learning, what courses would best fit me?"
+query = "i am a student interested in financial markets, possibly quantitative trading and machine learning, what courses would best fit me?"
 results = rag._find_most_similar_courses(query, course_list, embedding_list, k=20)
 print(results)
 
